@@ -1,250 +1,200 @@
-# 🏥 Hospital AI Assistant — Tech Challenge Fase 3 (FIAP)
+# 🏥 Hospital AI Assistant — Sistema de Suporte à Decisão Clínica (CDSS)
 
-> **Pós-Graduação em Inteligência Artificial para DEVs**  
-> **Tema:** Sistema Especialista de Suporte à Decisão Clínica Hospitalar (CDSS)  
-> **Stack Oficial:** Python 3.10+ | LangChain | LangGraph | FAISS | PEFT LoRA (LLaMA 3) | Transformers
+## Tech Challenge · Fase 3 — Pós-Graduação FIAP: IA para DEVs
 
----
-
-## 📑 Sumário Executivo
-1. [Visão Geral da Solução](#-visão-geral-da-solução)
-2. [Arquitetura de Pastas e Módulos](#-arquitetura-de-pastas-e-módulos)
-3. [Diagrama de Fluxo do LangGraph (Mermaid)](#-diagrama-de-fluxo-do-langgraph-mermaid)
-4. [Engenharia de Prompt: Os 4 Pilares e Chain-of-Thought (CoT)](#-engenharia-de-prompt-os-4-pilares-e-chain-of-thought-cot)
-5. [Estratégia de Fine-Tuning com LoRA (PEFT + HuggingFace TRL)](#-estratégia-de-fine-tuning-com-lora-peft--huggingface-trl)
-6. [Motor RAG e Indexação Vetorial](#-motor-rag-e-indexação-vetorial)
-7. [Camada de Segurança, Guardrails e Governança](#-camada-de-segurança-guardrails-e-governança)
-8. [Sistema de Auditoria e Conformidade (LGPD / CFM)](#-sistema-de-auditoria-e-conformidade-lgpd--cfm)
-9. [Instruções de Instalação e Execução](#-instruções-de-instalação-e-execução)
+Sistema de Suporte à Decisão Clínica (**CDSS**) em formato de **Chat Clínico Interativo**, orquestrado com **LangChain & LangGraph**, alimentado por um **LLM médico fine-tunado localmente em GPU** (`unsloth/Qwen2.5-7B-Instruct-bnb-4bit` + adaptador **LoRA Clínico**), **RAG Vetorial no Qdrant** (`intfloat/multilingual-e5-small`), base estruturada de **1.000 prontuários de pacientes**, **Guardrails multicamadas em conformidade com a Resolução CFM nº 2.314/2022** e observabilidade ponta a ponta via **LangSmith** e logs JSONL.
 
 ---
 
-## 🎯 Visão Geral da Solução
+## 🌟 Principais Funcionalidades
 
-O **Hospital AI Assistant** é um sistema avançado de Suporte à Decisão Clínica (CDSS - *Clinical Decision Support System*), projetado para auxiliar equipes médicas e de triagem hospitalar no reconhecimento ágil de condições clínicas tempo-dependentes (ex: **Sepse**, **Crise Hipertensiva** e **Síndrome Coronariana Aguda**).
-
-### Princípios Bioéticos e Regulatórios
-- **Zero Prescrição Autônoma:** Em estrita observância às resoluções do Conselho Federal de Medicina (CFM) e aos princípios éticos de IA em saúde, o sistema **NUNCA** emite prescrições médicas diretas. Toda orientação é expressa como recomendação preliminar condicionada à validação física e assinatura de um médico registrado (CRM).
-- **Rastreabilidade e Explainability:** Nenhuma conduta é sugerida sem que haja citação explícita do protocolo clínico institucional e do grau de evidência científica correspondente.
-- **Anonimização Ativa (LGPD/HIPAA):** Higienização de dados pessoais identificáveis (PII) com hashing determinístico de identificadores antes de qualquer processamento por LLMs.
+1. **Chat Clínico Interativo (Web Streamlit & CLI):**
+   - **Interface Web (`interface/web_interface.py` / `app_streamlit.py`):** Busca inteligente de pacientes (Nome, CPF ou Cartão SUS), roteiro didático guiado com 3 casos clínicos oficiais, anexo de até 5 laudos em PDF (upload externo ou sistema interno PACS/LIS), visualização do trace LangGraph, alertas de guardrail, painel de evidências RAG (explainability), catálogo de protocolos e aba de auditoria em tempo real.
+   - **Interface CLI (`interface/cli_interface.py` / `main.py`):** Chat interativo via terminal com comandos de busca, cadastro de pacientes, upload de exames e execução dos roteiros de demonstração.
+2. **LLM Local Fine-Tunado com Unsloth QLoRA (`Qwen2.5-7B-Instruct-bnb-4bit`):**
+   - Inferência local residente em VRAM/CUDA (`hospital_ai_assistant/agent/clinical_llm.py`) com adaptador LoRA treinado sobre **1.560 exemplos** (`1.404` treino / `156` validação) combinando protocolos institucionais, farmacovigilância, raciocínio conversacional e **PubMedQA PT-BR**.
+   - **Métricas do último treinamento (`NVIDIA GeForce RTX 4070 Ti`, 351 steps):** `lora_rank=16`, `lora_alpha=16`, `training_loss_final = 0.6912`, `perplexity = 1.996`.
+3. **Orquestração Agêntica com LangGraph (`HospitalChatGraph`):**
+   - Pipeline `StateGraph` de 6 nós com estado tipado (`ChatClinicalState`):
+     `node_input_guardrail` → `node_patient_resolver` → `node_rag_retriever` → `node_clinical_reasoning` → `node_output_guardrail` → `node_audit_logger`.
+   - Suporta **troca dinâmica de protocolo** durante a conversa caso o médico questione ou solicite outra diretriz institucional.
+4. **RAG Vetorial Multicamadas com Qdrant (Docker Compose):**
+   - Embeddings multilíngues **`intfloat/multilingual-e5-small`** (384 dimensões) rodando no Qdrant (`localhost:6333`).
+   - **Base de Conhecimento Institucional:** **110 protocolos clínicos** (`protocols_100_diseases.json`), **ontologia de alergias e farmacovigilância** (`drug_allergies_ontology.json`) e **ingestão dinâmica de laudos em PDF** por paciente (`pypdf`).
+5. **Base Estruturada de 1.000 Pacientes no Qdrant:**
+   - Prontuários gerados a partir de `patients_1000.csv` e indexados no Qdrant (`patient_db.py`) com Nome, Idade, Gênero, CPF, Cartão SUS, Comorbidades, Medicações em uso contínuo, Alergias documentadas e Histórico Clínico.
+6. **Guardrails Clínicos Multicamadas (Resolução CFM nº 2.314/2022):**
+   - **Input Guardrail:** Bloqueio contra *prompt injection* e tentativas de manipulação de instruções.
+   - **Output Guardrail (Determinístico + Agêntico):** Princípio de **Zero Prescrição Autônoma** (interceptação de ordens imperativas), cruzamento automático de **alergias documentadas no prontuário** e contraindicações do protocolo, citação de diretrizes e inclusão mandatória do Termo de Responsabilidade Médica (CRM).
+7. **Observabilidade e Auditoria Completa:**
+   - Rastreamento nativo no **LangSmith** (`LANGCHAIN_TRACING_V2`) e trilha local em `hospital_ai_assistant/audit_logs/clinical_audit.jsonl` com latência por turno, contagem de tokens, protocolos/exames recuperados e flags disparadas.
+8. **Acervo de 8 Laudos Médicos em PDF (`data/exams/`):**
+   - Laudos realistas prontos para demonstração cobrindo 4 pacientes: **Maria Helena Oliveira** (IAMCSST), **João da Silva** (Pneumonia / Alergia a Penicilinas), **Carlos Eduardo Santos** (AVCi / Trombólise) e **Ana Clara Souza** (Cetoacidose Diabética — CAD).
 
 ---
 
-## 📁 Arquitetura de Pastas e Módulos
+## 🏗️ Arquitetura do Fluxo (LangGraph)
 
-O projeto adota uma arquitetura modular, desacoplada e aderente aos padrões da engenharia de software moderna:
-
-```
-hospital_ai_assistant/
-│
-├── dataset/
-│   ├── prepare_data.py          # Pipeline de pré-processamento, anonimização LGPD e geração de pares SFT/RAG
-│   ├── synthetic_protocols.json # Base estruturada de protocolos institucionais e casos clínicos sintéticos
-│   ├── sft_training_data.jsonl  # Dataset instrucional formatado para fine-tuning (ChatML / LLaMA 3)
-│   └── rag_knowledge_base.json  # Corpus modular com metadados para indexação vetorial
-│
-├── finetuning/
-│   └── train_lora.py            # Script completo de Fine-Tuning com LoRA (PEFT + SFTTrainer/TRL)
-│
-├── rag_engine/
-│   └── vectorstore.py           # Motor RAG com FAISS, chunking clínico e embeddings determinísticos
-│
-├── safety/
-│   ├── guardrails.py            # Camada de segurança (Zero Prescrição, Contraindicações, Grounding)
-│   └── audit_logger.py          # Sistema de auditoria com persistência JSONL e medição de latência
-│
-├── agent/
-│   ├── state.py                 # Tipagem de estado clínico com TypedDict (StateGraph)
-│   ├── chains.py                # LCEL Chains, templates com os 4 pilares, CoT e fallback resiliente
-│   └── graph.py                 # Grafo de estados do LangGraph (nós, bifurcações condicionais e remediação)
-│
-├── audit_logs/                  # Diretório de persistência de auditorias (JSONL)
-├── storage/                     # Checkpoints e relatórios de adaptadores LoRA
-├── main.py                      # Ponto de entrada CLI interativo demonstrando casos clínicos
-├── requirements.txt             # Dependências estritas do projeto
-└── README.md                    # Documentação técnica e guia de execução
+```text
+Entrada do Médico (+ PDFs opcionais)
+        │
+        ▼
+[1] node_input_guardrail ──(bloqueado)──────────────────────┐
+        │ (seguro)                                          │
+        ▼                                                   │
+[2] node_patient_resolver   (Prontuário no Qdrant / Sessão) │
+        │                                                   │
+        ▼                                                   │
+[3] node_rag_retriever      (110 Protocolos + Alergias +    │
+        │                    PDFs do Paciente no Qdrant)    │
+        ▼                                                   │
+[4] node_clinical_reasoning (Qwen2.5-7B-4bit + LoRA local)  │
+        │                                                   │
+        ▼                                                   │
+[5] node_output_guardrail   (CFM 2.314/2022 + Alergias +    │
+        │                    Guardrail Agêntico)            │
+        ▼                                                   ▼
+[6] node_audit_logger       (JSONL Local + LangSmith Trace)
+        │
+        ▼
+Resposta Clínica Auditada ao Médico
 ```
 
 ---
 
-## 📊 Diagrama de Fluxo do LangGraph (Mermaid)
+## 📂 Estrutura do Projeto
 
-O fluxo de decisão clínica é orquestrado por uma máquina de estados finita construída sobre o `StateGraph` do **LangGraph**:
-
-```mermaid
-flowchart TD
-    START([Início: Admissão Clínica]) --> Ingest[1. Ingestão & Validação de Dados<br/>Cálculo qSOFA e PAM]
-    Ingest --> CheckExams[2. Verificação de Exames Pendentes<br/>Alertas Laboratoriais Críticos]
-    CheckExams --> QueryRAG[3. Consulta a Protocolos Hospitalares via RAG<br/>VectorStore FAISS]
-    QueryRAG --> Reasoning[4. Raciocínio Clínico com CoT<br/>LCEL Chains & 4 Pilares]
-    Reasoning --> Guardrails{5. Checagem de Segurança & Guardrails<br/>Prescrição Zero & Contraindicações}
-    
-    Guardrails -- "Seguro" --> FormatOutput[7. Output com Explainability<br/>Citação de Fontes & Disclaimer]
-    Guardrails -- "Contraindicação Detectada" --> Remediation[6. Remediação de Segurança<br/>Bloqueio & Alerta Vermelho]
-    
-    Remediation --> FormatOutput
-    FormatOutput --> AuditLogger[(Sistema de Auditoria Hospitalar<br/>JSONL & Métricas de Latência)]
-    AuditLogger --> END([Fim: Validação Médica Presencial Obrigatória])
+```text
+├── app_streamlit.py                      # Atalho para iniciar a interface Web Streamlit
+├── docker-compose.yml                    # Provisionamento do Qdrant VectorDB (portas 6333/6334)
+├── main.py                               # Ponto de entrada CLI, Demos, Auditoria e Web
+├── requirements.txt                      # Dependências Python do ecossistema
+├── .env.example                          # Modelo de variáveis de ambiente (LangSmith)
+├── data/
+│   └── exams/                            # 8 laudos médicos em PDF (4 pacientes) para RAG
+├── interface/
+│   ├── cli_interface.py                  # Chat interativo via Terminal (Rich + prompt_toolkit)
+│   └── web_interface.py                  # Interface Web completa em Streamlit
+└── hospital_ai_assistant/
+    ├── agent/
+    │   ├── chat_graph.py                 # Orquestrador StateGraph (LangGraph)
+    │   ├── chat_state.py                 # Estado conversacional tipado
+    │   └── clinical_llm.py               # Inferência local (Qwen2.5-7B-4bit + LoRA)
+    ├── audit_logs/                       # Logs JSONL de auditoria conversacional
+    ├── database/
+    │   └── patient_db.py                 # Repositório de 1.000 prontuários no Qdrant
+    ├── dataset/
+    │   ├── build_sft_and_rag_dataset.py  # Pipeline de curadoria SFT + RAG
+    │   ├── raw/
+    │   │   ├── patients_1000.csv               # Base de 1.000 pacientes
+    │   │   ├── protocols_100_diseases.json     # 110 protocolos clínicos institucionais
+    │   │   ├── drug_allergies_ontology.json    # Ontologia de farmacovigilância/alergias
+    │   │   └── pubmedqa/ori_pqal_ptbr.json     # Corpus PubMedQA traduzido (PT-BR)
+    │   └── processed/
+    │       ├── rag_hospital_knowledge_base.json
+    │       ├── sft_unsloth_medical_train.jsonl
+    │       └── sft_unsloth_medical_val.jsonl
+    ├── finetuning/
+    │   └── train_unsloth.py              # Script de Fine-Tuning QLoRA com Unsloth
+    ├── rag_engine/
+    │   └── qdrant_rag.py                 # Motor RAG Qdrant (multilingual-e5-small) + PDFs
+    ├── safety/
+    │   ├── guardrails.py                 # Guardrails determinísticos + agênticos (CFM)
+    │   └── audit_logger.py               # Auditor estruturado JSONL / LangSmith
+    └── storage/
+        └── lora_clinical_adapter/        # Metadados, tokenizer e métricas do adaptador LoRA
 ```
 
-### Explicação dos Nós do Grafo:
-1. `node_ingest_and_validate`: Valida tipagem, higieniza dados e calcula escores de triagem automatizados (**qSOFA** para sepse, **PAM** para hemodinâmica). Se $qSOFA \ge 2$ ou $PAS \ge 180$, classifica como caso crítico imediato.
-2. `node_check_pending_exams`: Cruza os exames pendentes com os critérios de confirmação diagnóstica, alertando sobre a urgência de processamento de exames como *lactato arterial*, *hemoculturas* ou *troponina*.
-3. `node_query_protocols_rag`: Formula uma consulta semântica baseada na queixa e sinais vitais, consultando o VectorStore para recuperar as diretrizes institucionais aplicáveis.
-4. `node_generate_clinical_reasoning`: Executa a chain LangChain aplicando raciocínio passo a passo (**Chain-of-Thought**) sob o contexto delimitado dos protocolos.
-5. `node_safety_and_guardrails`: Valida a inferência contra prescrições imperativas autônomas, averigua a presença da citação de fontes institucionais e checa contraindicações conhecidas.
-6. `node_safety_remediation`: *(Nó Condicional)* Intervém caso haja conduta contraindicada, injetando alertas de bloqueio institucional antes da emissão.
-7. `node_format_explainability_output`: Formata o laudo final com referências científicas completas e disclaimer médico legal obrigatório.
-
 ---
 
-## 🧠 Engenharia de Prompt: Os 4 Pilares e Chain-of-Thought (CoT)
+## 🚀 Como Executar o Projeto
 
-Os templates em `agent/chains.py` implementam rigorosamente os **4 Pilares de Engenharia de Prompt**:
+### 1. Pré-requisitos e Instalação
+- Python **3.10+**, Docker & Docker Compose
+- GPU NVIDIA com CUDA (recomendado ≥ 8–12 GB VRAM para `Qwen2.5-7B-Instruct-bnb-4bit`; há fallback automático para CPU)
 
-| Pilar | Papel Pedagógico | Implementação no Assistente |
-|---|---|---|
-| **1. Instrução Clara** | Define o papel (*Persona*), escopo de atuação e proibições éticas. | Define o assistente como CDSS do hospital, proibindo prescrições autônomas sem CRM. |
-| **2. Contexto Delimitado** | Restringe a geração aos documentos recuperados pelo RAG. | Protocolos hospitalares injetados entre tags `<protocolos_hospitalares>...</protocolos_hospitalares>`. |
-| **3. Dados de Entrada Estruturados** | Fornece dados clínicos sem ambiguidade semântica. | JSON estruturado contendo idade, sinais vitais, histórico, exames pendentes e concluídos. |
-| **4. Indicador de Formato de Saída** | Padroniza a resposta para consumo profissional. | Markdown estruturado em 5 seções obrigatórias: CoT, Alertas, Condutas, Fontes e Disclaimer. |
-
-### Raciocínio Clínico Passo a Passo (Chain-of-Thought - CoT)
-O modelo é instruído a decompor a análise antes de sugerir condutas:
-1. **Passo 1:** Interpretar os sinais vitais brutos (frequência respiratória, pressão, saturação, temperatura).
-2. **Passo 2:** Calcular e pontuar os escores de risco ($qSOFA$, $NEWS2$, $PAM$).
-3. **Passo 3:** Identificar diagnósticos diferenciais e lesões agudas de órgãos-alvo.
-4. **Passo 4:** Correlacionar os achados com os pacotes de intervenção do protocolo institucional recuperado.
-5. **Passo 5:** Formatar cada recomendação com aviso expresso de validação médica física.
-
----
-
-## 🧬 Estratégia de Fine-Tuning com LoRA (PEFT + HuggingFace TRL)
-
-O script `finetuning/train_lora.py` implementa a adaptação supervisionada de modelos fundacionais (LLaMA 3 / 3.1 8B):
-
-### Formulação Matemática do LoRA:
-Em vez de ajustar a matriz densa original $W_0 \in \mathbb{R}^{d \times k}$, o LoRA congela $W_0$ e introduz matrizes de baixo posto $B \in \mathbb{R}^{d \times r}$ e $A \in \mathbb{R}^{r \times k}$ com rank $r \ll \min(d, k)$:
-$$W = W_0 + \Delta W = W_0 + \frac{\alpha}{r} (B \cdot A)$$
-
-### Configuração de Hiperparâmetros:
-- **Rank ($r$):** 16 (capacidade expressiva suficiente para diretrizes clínicas sem risco de overfitting).
-- **Escalonamento ($\alpha$):** 32 ($\alpha = 2 \times r$ para convergência estável dos gradientes).
-- **Dropout:** 0.05.
-- **Módulos Alvo (`target_modules`):** `q_proj`, `k_proj`, `v_proj`, `o_proj`, `gate_proj`, `up_proj`, `down_proj`.
-- **Economia de Recursos:** Redução de **~99.6%** dos parâmetros treináveis (~29 milhões treináveis em vez de 8 bilhões), viabilizando treinamento e inferência em GPUs locais com QLoRA 4-bit (NF4).
-- **Modo Dry-Run Integrado:** Permite validar datasets, tokenizers e cálculo de parâmetros sem exigir placa de vídeo dedicada.
-
----
-
-## 🔍 Motor RAG e Indexação Vetorial
-
-Implementado em `rag_engine/vectorstore.py`:
-- **Fragmentação Semântica (Chunking):** `ClinicalTextSplitter` especializado que divide seções mantendo cabeçalhos de critérios, condutas e contraindicações intactos.
-- **Vetorização (Embeddings):** Suporta `HuggingFaceEmbeddings` / `OpenAIEmbeddings`, com fallback determinístico local (`DeterministicClinicalEmbeddings`) para execução offline contínua.
-- **Indexação Vetorial:** Suporte a `FAISS` com cálculo de similaridade de cosseno ponderada e filtragem por metadados de urgência e categoria.
-
----
-
-## 🛡️ Camada de Segurança, Guardrails e Governança
-
-Implementada em `safety/guardrails.py`:
-1. **Zero Autonomous Prescription:**
-   - Detecta imperativos e dosagens medicamentosas ("administre 1000ml", "prescreva noradrenalina").
-   - Sanitiza comandos diretos, convertendo-os em "Sugere-se avaliar para prescrição médica de...".
-2. **Grounding & Protocol Attribution:**
-   - Verifica se a inferência cita o código do protocolo institucional (ex: `PROTOCOLO-SEP-001`).
-   - Se ausente, injeta compulsoriamente a fundamentação recuperada pelo RAG.
-3. **Contraindicações Críticas:**
-   - Bloqueia práticas perigosas contraindicadas em protocolo (ex: uso de nifedipino sublingual na crise hipertensiva ou atraso de antimicrobianos na sepse).
-4. **Legal Disclaimer Obrigatório:**
-   - Garante que todo laudo termine com o aviso institucional obrigatório de validação médica com CRM.
-
----
-
-## 📋 Sistema de Auditoria e Conformidade (LGPD / CFM)
-
-Implementado em `safety/audit_logger.py`:
-- Cada consulta gera um `AuditTransaction` único (UUID v4).
-- Registro persistido em `audit_logs/clinical_audit.jsonl` com:
-  - `transaction_id` e `timestamp_utc` (ISO-8601).
-  - `patient_id` (pseudonimizado via hash SHA-256).
-  - Protocolos institucionais consultados e scores de relevância.
-  - Flags de segurança disparadas e status de aprovação.
-  - Decomposição de **latência por nó** (em milissegundos) e latência total da inferência.
-
----
-
-## 🚀 Instruções de Instalação e Execução
-
-### 1. Pré-Requisitos
-- Python 3.10 ou superior instalado.
-- Ambiente virtual recomendado (`venv`).
-
-### 2. Criação do Ambiente Virtual e Instalação
 ```bash
-# Clone ou acesse o diretório do projeto
-cd hospital_ai_assistant
-
-# Crie e ative o ambiente virtual
+# Criar e ativar ambiente virtual
 python3 -m venv .venv
-source .venv/bin/activate  # No Linux/macOS
-# .venv\Scripts\activate   # No Windows
+source .venv/bin/activate
 
-# Instale as dependências
+# Instalar dependências
 pip install -r requirements.txt
+
+# Configurar variáveis de ambiente (opcional para LangSmith)
+cp .env.example .env
 ```
 
-### 3. Preparação e Anonimização dos Dados
-Executa a higienização de PII e gera os arquivos SFT e RAG:
+### 2. Iniciar o VectorDB Qdrant (Docker Compose)
 ```bash
-python3 dataset/prepare_data.py
+docker compose up -d
 ```
+O dashboard do Qdrant ficará disponível em `http://localhost:6333/dashboard`.
 
-### 4. Simulação de Fine-Tuning LoRA (Dry-Run ou Treinamento Real)
+### 3. Preparar a Base Vetorial (Primeira Execução)
+Popula os 1.000 prontuários, constrói o dataset SFT/RAG e indexa os protocolos no Qdrant:
 ```bash
-# Simulação pedagógica (valida hiperparâmetros e dados sem requerer GPU):
-python3 finetuning/train_lora.py --dry_run
-
-# Treinamento com GPU (caso disponível):
-python3 finetuning/train_lora.py --epochs 3 --batch_size 2
+python main.py --prepare-all
 ```
 
-### 5. Execução do Assistente Clínico (Demonstração Completa)
+### 4. Gerar o Adaptador LoRA Local (Fine-Tuning com Unsloth)
+> **Nota:** Os pesos binários `adapter_model.safetensors` (~155 MB) são ignorados no Git pelo limite de 100 MB do GitHub. Execute o script abaixo em ambiente com GPU CUDA para gerar o adaptador em `hospital_ai_assistant/storage/lora_clinical_adapter/` (os metadados e métricas do treino de referência já estão versionados no repositório):
+
 ```bash
-# Executa todos os casos clínicos (Sepse, Crise Hipertensiva, SCA):
-python3 main.py --case all
+# Treinamento QLoRA com GPU CUDA + Unsloth
+python hospital_ai_assistant/finetuning/train_unsloth.py
 
-# Executa apenas o caso de Sepse:
-python3 main.py --case sepsis
-
-# Executa apenas o caso de Crise Hipertensiva:
-python3 main.py --case hypertension
-
-# Exporta o diagrama Mermaid do LangGraph:
-python3 main.py --export-diagram
-
-# Visualiza os logs estruturados de auditoria hospitalar:
-python3 main.py --view-audit
+# Ou validação estruturada (dry-run sem GPU)
+python hospital_ai_assistant/finetuning/train_unsloth.py --dry-run
 ```
+
+### 5. Iniciar a Interface Web (Streamlit)
+```bash
+python main.py --web
+# ou diretamente:
+streamlit run app_streamlit.py
+```
+Acesse no navegador: `http://localhost:8501`.
+
+### 6. Iniciar o Chat Interativo via Terminal (CLI)
+```bash
+python main.py
+```
+Comandos disponíveis no terminal:
+- `/paciente <nome ou CPF>` — busca e vincula o prontuário do paciente;
+- `/cadastrar` — fluxo guiado de admissão de novo paciente;
+- `/upload <caminho.pdf>` — ingere um laudo em PDF no Qdrant;
+- `/demo <1, 2 ou 3>` — executa os roteiros automáticos de demonstração;
+- `/audit` — exibe logs de auditoria e latência por nó;
+- `/limpar` — reinicia o contexto da conversa;
+- `/sair` — encerra a sessão.
 
 ---
 
-## 👨‍⚕️ Casos Clínicos Demonstrados no Sistema
+## 🧪 Casos Clínicos para Demonstração
 
-### Caso 1: Sepse de Foco Pulmonar (`CASE-SEP-001`)
-- **Quadro:** Paciente 73 anos com febre, tosse purulenta, taquipneia (26 irpm), PA 90/55 mmHg, Glasgow 13.
-- **Conduta:** qSOFA = 3 pontos (alto risco). Ativação do **Pacote de 1ª Hora** do `PROTOCOLO-SEP-001`: hemoculturas imediatas, lactato arterial prioritário, ressuscitação volêmica (30 ml/kg) e antibiótico venoso em até 1 hora sob validação médica.
+Na Interface Web (painel de roteiro guiado) ou via CLI (`python main.py --demo <1|2|3>`):
 
-### Caso 2: Emergência Hipertensiva (`CASE-HAS-002`)
-- **Quadro:** Paciente 58 anos com PA 215/125 mmHg, cefaleia intensa, náuseas e turvação visual.
-- **Conduta:** Suspeita de Encefalopatia Hipertensiva. Encaminhamento para Sala Vermelha, sugestão de vasodilatador venoso em bomba (Nitroprussiato) conforme `PROTOCOLO-HAS-002`, proibição expressa de nifedipino sublingual e TC de crânio urgente.
-
-### Caso 3: Síndrome Coronariana Aguda (`CASE-SCA-003`)
-- **Quadro:** Paciente 62 anos com dor retroesternal em aperto (8/10) irradiada para mandíbula e MSE, ECG com infradesnivelamento de ST em V4-V6.
-- **Conduta:** Ativação do `PROTOCOLO-SCA-003`: tempo porta-eletro < 10 min confirmado, troponina seriada, monitorização cardíaca contínua e avaliação para antiagregação plaquetária (AAS mastigável).
+| Caso | Paciente | Quadro Clínico | Protocolo Esperado | Foco da Validação |
+| :--- | :--- | :--- | :--- | :--- |
+| **Caso 1** | Maria Helena Oliveira | Dor torácica retroesternal + ECG Supra ST + Troponina | `PROTOCOLO-CLIN-002` (IAMCSST) | Correlação de ECG/Troponina e contraindicação a nitratos na hipotensão (`PA 80/50`) |
+| **Caso 2** | João da Silva | Tosse produtiva, febre, DPOC + Hemograma/PCR `94.2 mg/L` | `PROTOCOLO-CLIN-011` (PAC) | Alergia grave a Penicilinas (bloqueio de betalactâmicos + alternativa segura) |
+| **Caso 3** | Carlos Eduardo Santos | Hemiparesia súbita `< 4.5h` + TC sem hemorragia + RNI `1.38` | `PROTOCOLO-CLIN-031` (AVCi) | Elegibilidade para trombólise e contraindicação com `PA 195/110 mmHg` |
+| **Manual** | Ana Clara Souza | DM1, vômitos, hálito cetônico + Gasometria `pH 7.15` / `K+ 4.8` | `PROTOCOLO-CLIN-041` (CAD) | Fluxo 100% manual (busca, upload de PDFs, regra de `K+ < 3.3` e alergia a Sulfas) |
 
 ---
 
-## ⚖️ Conformidade e Aviso Legal
-> **Aviso de Isenção de Responsabilidade:** Este software foi desenvolvido para fins estritamente acadêmicos e pedagógicos no âmbito do Tech Challenge da Pós-Graduação FIAP. Ele opera exclusivamente como Sistema de Suporte à Decisão Clínica (CDSS) e não substitui a avaliação presencial, julgamento clínico ou conduta de médicos devidamente habilitados e registrados no Conselho Regional de Medicina (CRM).
+## 📊 Observabilidade e Auditoria (LangSmith & JSONL)
+
+Para ativar o rastreamento em tempo real no **LangSmith**, preencha o arquivo `.env`:
+
+```env
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_API_KEY="sua_chave_langsmith"
+LANGCHAIN_PROJECT="hospital-ai-assistant"
+```
+
+Para consultar os últimos registros de auditoria diretamente pelo terminal:
+```bash
+python main.py --audit
+```

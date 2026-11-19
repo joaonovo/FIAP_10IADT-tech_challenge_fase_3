@@ -1,0 +1,32 @@
+{
+  "status": "COMPLETED_ON_CUDA",
+  "model_name": "unsloth/Qwen2.5-7B-Instruct-bnb-4bit",
+  "training_framework": "Unsloth AI (FastLanguageModel) + HuggingFace Trainer",
+  "gpu_device": "NVIDIA GeForce RTX 4070 Ti",
+  "vram_total_gb": 11.99,
+  "lora_rank": 16,
+  "lora_alpha": 16,
+  "target_modules": [
+    "q_proj",
+    "k_proj",
+    "v_proj",
+    "o_proj",
+    "gate_proj",
+    "up_proj",
+    "down_proj"
+  ],
+  "dataset_sizes": {
+    "train_samples": 1404,
+    "val_samples": 156,
+    "sources": [
+      "hospital_pharmacovigilance (10 QA)",
+      "hospital_protocols (440 QA)",
+      "hospital_protocols_conversational (110 QA)",
+      "pubmedqa (1000 QA)"
+    ]
+  },
+  "training_loss_final": 0.6912,
+  "training_perplexity": 1.996,
+  "steps_executed": 351,
+  "output_adapter_directory": "/home/jpnov/Repository/FIAP/IA para DEVs/10IADT_FASE_3/TechChallenge/Desenvolvimento/hospital_ai_assistant/storage/lora_clinical_adapter"
+}

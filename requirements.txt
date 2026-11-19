@@ -1,0 +1,39 @@
+# ==============================================================================
+# Dependências do Projeto Hospital AI Assistant - Tech Challenge Fase 3 (FIAP)
+# Stack: Python 3.10+ | LangChain | LangGraph | Qdrant | Unsloth LoRA | Streamlit
+# ==============================================================================
+
+# Orquestração e Agentes (LangChain e LangGraph)
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-community>=0.3.0
+langchain-openai>=0.2.0
+langgraph>=0.2.0
+
+# Vetorização e Recuperação (RAG Qdrant)
+qdrant-client>=1.10.0
+langchain-qdrant>=1.0.0
+sentence-transformers>=3.0.0
+tiktoken>=0.7.0
+pypdf>=5.0.0
+
+# Fine-Tuning Supervisionado e LoRA (Transformers + PyTorch)
+transformers>=5.0.0
+peft>=0.10.0
+datasets>=2.19.0
+accelerate>=0.29.0
+bitsandbytes>=0.43.0; platform_system != "Windows"
+torch>=2.1.0
+torchvision>=0.16.0
+
+# Interface Gráfica, CLI e Relatórios
+streamlit>=1.35.0
+rich>=13.7.0
+prompt_toolkit>=3.0.0
+reportlab>=4.0.0
+
+# Validação Estruturada e Tipagem
+pydantic>=2.7.0
+typing-extensions>=4.10.0
+numpy>=1.26.0
+scipy>=1.10.0

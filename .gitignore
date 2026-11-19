@@ -1,11 +1,80 @@
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
+# ==============================================================================
+# Git Ignore - Hospital AI Assistant (Tech Challenge Fase 3 - FIAP)
+# ==============================================================================
+
+# --- Ambientes Virtuais e Dependências ---
 .venv/
 env/
 venv/
+ENV/
+env.bak/
+venv.bak/
+
+# --- Variáveis de Ambiente e Segredos (NUNCA SUBIR) ---
+.env
+.env.*
+!.env.example
+
+# --- Python Bytecode e Cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.streamlit/
+
+# --- Caches de IA, Fine-Tuning e Otimizadores (Unsloth / Transformers / Torch) ---
+unsloth_compiled_cache/
+lora_output/
+runs/
+wandb/
+.cache/
+checkpoint-*/
+*/checkpoint-*/
+*.safetensors
+
+# --- Banco de Dados Vetorial Local (Qdrant Container Data) ---
+hospital_ai_assistant/storage/qdrant_data/
+qdrant_data/
+
+# --- Logs de Execução e Auditoria Local ---
+*.log
+hospital_ai_assistant/audit_logs/*.jsonl
+!hospital_ai_assistant/audit_logs/.gitkeep
+
+# --- Documentação de Estudo Interno ---
+doc/
+
+# --- IDEs e Editores de Código ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# --- Jupyter Notebooks Cache ---
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# --- Testes e Cobertura ---
 .pytest_cache/
 .coverage
 htmlcov/
-*.log
+.mypy_cache/
