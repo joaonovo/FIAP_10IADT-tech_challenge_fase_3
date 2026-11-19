@@ -16,6 +16,7 @@ from peft import PeftModel
 current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(os.path.dirname(current_dir))
 DEFAULT_ADAPTER_DIR = os.path.join(root_dir, "hospital_ai_assistant", "storage", "lora_clinical_adapter")
+DEFAULT_HF_ADAPTER_REPO = os.environ.get("HFIAP_LORA_REPO", "joaonovo/hfiap-qwen2.5-7b-clinical-lora")
 
 
 def _resolve_default_base_model(adapter_dir: str) -> str:
@@ -90,13 +91,21 @@ class ClinicalFineTunedLLM:
                     trust_remote_code=True
                 )
 
-            # 3. Anexa os Adaptadores LoRA Clínicos Fine-Tunados
+            # 3. Anexa os Adaptadores LoRA Clínicos Fine-Tunados (local ou Hugging Face Hub)
+            self._lora_attached = False
             if os.path.exists(os.path.join(self.adapter_dir, "adapter_model.safetensors")):
                 self._model = PeftModel.from_pretrained(base_model, self.adapter_dir)
-                print(f"✅ [ClinicalFineTunedLLM] Adaptador LoRA anexado com sucesso!")
+                self._lora_attached = True
+                print(f"✅ [ClinicalFineTunedLLM] Adaptador LoRA local anexado com sucesso!")
             else:
-                self._model = base_model
-                print(f"⚠️ [ClinicalFineTunedLLM] Adaptador LoRA não encontrado. Usando modelo base.")
+                try:
+                    print(f"☁️ [ClinicalFineTunedLLM] Pesos locais ausentes. Baixando adaptador LoRA do Hugging Face ({DEFAULT_HF_ADAPTER_REPO})...")
+                    self._model = PeftModel.from_pretrained(base_model, DEFAULT_HF_ADAPTER_REPO)
+                    self._lora_attached = True
+                    print(f"✅ [ClinicalFineTunedLLM] Adaptador LoRA ({DEFAULT_HF_ADAPTER_REPO}) anexado com sucesso!")
+                except Exception as hf_err:
+                    self._model = base_model
+                    print(f"⚠️ [ClinicalFineTunedLLM] Adaptador LoRA não disponível ({hf_err}). Usando modelo base.")
 
             self._model.eval()
             print(f"🚀 [ClinicalFineTunedLLM] Modelo residente em VRAM carregado em {time.time() - t0:.2f}s!")
@@ -111,7 +120,7 @@ class ClinicalFineTunedLLM:
 
     def get_model_label(self) -> str:
         short_name = self.base_model_id.split("/")[-1]
-        has_lora = os.path.exists(os.path.join(self.adapter_dir, "adapter_model.safetensors"))
+        has_lora = getattr(self, "_lora_attached", False) or os.path.exists(os.path.join(self.adapter_dir, "adapter_model.safetensors"))
         return f"{short_name} + LoRA Clínico" if has_lora else short_name
 
     def generate_clinical_reasoning(

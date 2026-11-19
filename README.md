@@ -12,7 +12,7 @@ Sistema de Suporte à Decisão Clínica (**CDSS**) em formato de **Chat Clínico
    - **Interface Web (`interface/web_interface.py` / `app_streamlit.py`):** Busca inteligente de pacientes (Nome, CPF ou Cartão SUS), roteiro didático guiado com 3 casos clínicos oficiais, anexo de até 5 laudos em PDF (upload externo ou sistema interno PACS/LIS), visualização do trace LangGraph, alertas de guardrail, painel de evidências RAG (explainability), catálogo de protocolos e aba de auditoria em tempo real.
    - **Interface CLI (`interface/cli_interface.py` / `main.py`):** Chat interativo via terminal com comandos de busca, cadastro de pacientes, upload de exames e execução dos roteiros de demonstração.
 2. **LLM Local Fine-Tunado com Unsloth QLoRA (`Qwen2.5-7B-Instruct-bnb-4bit`):**
-   - Inferência local residente em VRAM/CUDA (`hospital_ai_assistant/agent/clinical_llm.py`) com adaptador LoRA treinado sobre **1.560 exemplos** (`1.404` treino / `156` validação) combinando protocolos institucionais, farmacovigilância, raciocínio conversacional e **PubMedQA PT-BR**.
+   - Inferência local residente em VRAM/CUDA (`hospital_ai_assistant/agent/clinical_llm.py`) com adaptador LoRA publicado no Hugging Face Hub ([`joaonovo/hfiap-qwen2.5-7b-clinical-lora`](https://huggingface.co/joaonovo/hfiap-qwen2.5-7b-clinical-lora)), treinado sobre **1.560 exemplos** (`1.404` treino / `156` validação) combinando protocolos institucionais, farmacovigilância, raciocínio conversacional e **PubMedQA PT-BR**.
    - **Métricas do último treinamento (`NVIDIA GeForce RTX 4070 Ti`, 351 steps):** `lora_rank=16`, `lora_alpha=16`, `training_loss_final = 0.6912`, `perplexity = 1.996`.
 3. **Orquestração Agêntica com LangGraph (`HospitalChatGraph`):**
    - Pipeline `StateGraph` de 6 nós com estado tipado (`ChatClinicalState`):
@@ -137,25 +137,27 @@ Popula os 1.000 prontuários, constrói o dataset SFT/RAG e indexa os protocolos
 python main.py --prepare-all
 ```
 
-### 4. Gerar o Adaptador LoRA Local (Fine-Tuning com Unsloth)
-> **Nota:** Os pesos binários `adapter_model.safetensors` (~155 MB) são ignorados no Git pelo limite de 100 MB do GitHub. Execute o script abaixo em ambiente com GPU CUDA para gerar o adaptador em `hospital_ai_assistant/storage/lora_clinical_adapter/` (os metadados e métricas do treino de referência já estão versionados no repositório):
+### 4. Adaptador LoRA Clínico (Hugging Face Hub ou Fine-Tuning Local)
+O adaptador LoRA treinado (`adapter_model.safetensors`, ~155 MB) está publicado no Hugging Face Hub em **[`joaonovo/hfiap-qwen2.5-7b-clinical-lora`](https://huggingface.co/joaonovo/hfiap-qwen2.5-7b-clinical-lora)**.
 
-```bash
-<<<<<<< HEAD
-# Instalar Unsloth (necessário apenas para executar o fine-tuning em GPU CUDA)
-pip install unsloth
+- **Opção A — Download Automático / Direto (Recomendado):**
+  Ao iniciar o sistema sem o arquivo local, o `clinical_llm.py` **baixa e anexa automaticamente** o adaptador diretamente do Hugging Face Hub. Se preferir baixar manualmente para o diretório local antes de executar:
+  ```bash
+  hf download joaonovo/hfiap-qwen2.5-7b-clinical-lora \
+    --local-dir hospital_ai_assistant/storage/lora_clinical_adapter
+  ```
 
-# Reproduzir exatamente o treinamento de referência (1 época completa = 351 steps)
-python hospital_ai_assistant/finetuning/train_unsloth.py --max-steps -1 --epochs 1 --learning-rate 5e-5
+- **Opção B — Reproduzir o Fine-Tuning do Zero (GPU CUDA + Unsloth):**
+  ```bash
+  # Instalar Unsloth (necessário apenas para executar o fine-tuning em GPU CUDA)
+  pip install unsloth
 
-=======
-# Treinamento QLoRA com GPU CUDA + Unsloth
-python hospital_ai_assistant/finetuning/train_unsloth.py
+  # Reproduzir exatamente o treinamento de referência (1 época completa = 351 steps)
+  python hospital_ai_assistant/finetuning/train_unsloth.py --max-steps -1 --epochs 1 --learning-rate 5e-5
 
->>>>>>> 982022526d75e1dfad0c05312cca2f2ab8fa17f7
-# Ou validação estruturada (dry-run sem GPU)
-python hospital_ai_assistant/finetuning/train_unsloth.py --dry-run
-```
+  # Ou validação estruturada (dry-run sem GPU)
+  python hospital_ai_assistant/finetuning/train_unsloth.py --dry-run
+  ```
 
 ### 5. Iniciar a Interface Web (Streamlit)
 ```bash
