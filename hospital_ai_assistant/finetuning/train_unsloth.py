@@ -3,7 +3,7 @@ Módulo de Fine-Tuning Supervisionado (SFT) com Unsloth e LoRA
 =============================================================
 
 Tech Challenge - Fase 3: IA para DEVs (FIAP)
-Modelo Base: unsloth/Llama-3.2-1B-bnb-4bit
+Modelo Base: Qwen2.5-7B-Instruct
 Framework: Unsloth AI (FastLanguageModel) + HuggingFace Trainer
 Aceleração: Otimização nativa para GPU NVIDIA (ex: RTX 4070 Ti)
 
