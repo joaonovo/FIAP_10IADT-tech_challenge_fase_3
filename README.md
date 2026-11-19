@@ -141,12 +141,18 @@ python main.py --prepare-all
 > **Nota:** Os pesos binários `adapter_model.safetensors` (~155 MB) são ignorados no Git pelo limite de 100 MB do GitHub. Execute o script abaixo em ambiente com GPU CUDA para gerar o adaptador em `hospital_ai_assistant/storage/lora_clinical_adapter/` (os metadados e métricas do treino de referência já estão versionados no repositório):
 
 ```bash
+<<<<<<< HEAD
 # Instalar Unsloth (necessário apenas para executar o fine-tuning em GPU CUDA)
 pip install unsloth
 
 # Reproduzir exatamente o treinamento de referência (1 época completa = 351 steps)
 python hospital_ai_assistant/finetuning/train_unsloth.py --max-steps -1 --epochs 1 --learning-rate 5e-5
 
+=======
+# Treinamento QLoRA com GPU CUDA + Unsloth
+python hospital_ai_assistant/finetuning/train_unsloth.py
+
+>>>>>>> 982022526d75e1dfad0c05312cca2f2ab8fa17f7
 # Ou validação estruturada (dry-run sem GPU)
 python hospital_ai_assistant/finetuning/train_unsloth.py --dry-run
 ```
