@@ -1,0 +1,170 @@
+{
+  "hospital_metadata": {
+    "institution": "Complexo Hospitalar Universitário FIAP - SUS",
+    "committee": "Comissão de Farmácia e Terapêutica (CFT) & Núcleo de Segurança do Paciente (NSP)",
+    "normative_framework": "Resolução CFM nº 2.314/2022 & RDC Anvisa nº 36/2013",
+    "title": "Catálogo Institucional de Alergias Medicamentosas, Reações Adversas e Farmacovigilância",
+    "version": "3.0-PROD",
+    "last_revision": "Outubro/2026"
+  },
+  "classes": {
+    "betalactamicos": {
+      "name": "Penicilinas e Betalactâmicos (Penicilinas, Cefalosporinas e Carbapenêmicos)",
+      "allergy_terms": [
+        "penicilina", "penicilinas", "betalactâmico", "betalactamico", "betalactâmicos", "betalactamicos",
+        "amoxicilina", "ampicilina", "oxacilina", "benzetacil", "clavulin", "cefalosporina", "cefalosporinas",
+        "cefalexina", "cefazolina", "ceftriaxona", "rocefin", "rocephin", "meropenem", "carbapenemico"
+      ],
+      "clinical_mechanism": "Hipersensibilidade Tipo I mediada por IgE contra o anel betalactâmico e determinantes antigênicos maiores/menores (peniciloil). Risco iminente de broncoespasmo grave, angioedema de glote e choque anafilático cardiovascular.",
+      "contraindicated_drugs": [
+        "penicilina", "penicilina procaína", "penicilina benzatina", "benzetacil", "penicilina cristalina", "penicilina g",
+        "amoxicilina", "amoxicilina + clavulanato", "amoxicilina e clavulanato", "clavulin", "clavulanato", "amoxil",
+        "ampicilina", "ampicilina + sulbactam", "unasyn", "oxacilina", "staficilin", "piperacilina", "piperacilina + tazobactam", "tazocin",
+        "cefalexina", "keflex", "cefazolina", "kefazol", "cefadroxila", "cefaclor", "cefuroxima", "zinacef",
+        "ceftriaxona", "rocefin", "cefotaxima", "ceftazidima", "fortaz", "cefepima", "maxcef", "ceftarolina", "zinforo",
+        "meropenem", "meronem", "imipenem", "imipenem + cilastatina", "tienam", "ertapenem", "invanz"
+      ],
+      "safe_alternatives": {
+        "respiratory": "Quinolona Respiratória (Levofloxacino 750mg EV/VO 1x/dia por 7 dias ou Moxifloxacino 400mg 1x/dia) OU Macrolídeo (Azitromicina 500mg/dia) associado a Doxiciclina 100mg 12/12h.",
+        "skin": "Clindamicina 600mg EV/VO a cada 6 horas por 7 a 10 dias OU Vancomicina 15-20 mg/kg EV a cada 12 horas (se critério de internação hospitalar).",
+        "urinary": "Fluoroquinolonas (Ciprofloxacino 500mg 12/12h VO ou Levofloxacino 500mg 1x/dia) OU Aminoglicosídeos (Amicacina 15mg/kg/dia EV) conforme função renal.",
+        "sepsis": "Glicopeptídeos (Vancomicina 15-20mg/kg 12/12h) associados a Quinolonas ou Aztreonam (monobactâmico seguro sem reatividade cruzada).",
+        "generic": "Antimicrobiano de classe não-betalactâmica (Quinolonas, Macrolídeos, Lincosamidas ou Glicopeptídeos conforme antibiograma e foco infeccioso)."
+      }
+    },
+    "dipirona": {
+      "name": "Dipirona / Pirazolonas (Analgésicos Não-Opioides)",
+      "allergy_terms": [
+        "dipirona", "metamizol", "novalgina", "pirazolona", "pirazolonas", "lisador", "anador", "neosaldina", "dorflex", "buscopan composto"
+      ],
+      "clinical_mechanism": "Reação de hipersensibilidade não-alérgica (idiossincrática ou anafilactoide) ou imunológica mediada por IgE, com risco de hipotensão refratária, urticária generalizada, agranulocitose e laringoespasmo.",
+      "contraindicated_drugs": [
+        "dipirona", "dipirona sódica", "metamizol", "novalgina", "anador", "lisador", "neosaldina", "dorflex",
+        "buscopan composto", "sedalex", "doril", "migraliv", "doralgina"
+      ],
+      "safe_alternatives": {
+        "generic": "Paracetamol 500-750mg VO a cada 6 horas (dose máxima 3g/dia em adultos) OU Ibuprofeno/AINEs se função renal preservada.",
+        "severe_pain": "Tramadol 50-100mg EV/VO a cada 6-8 horas ou analgesia multimodal não-pirazolônica."
+      }
+    },
+    "aines": {
+      "name": "Anti-inflamatórios Não Esteroidais (AINEs) e Inibidores de COX",
+      "allergy_terms": [
+        "aine", "aines", "anti-inflamatório", "antiinflamatório", "anti-inflamatórios", "ibuprofeno", "cetoprofeno", "diclofenaco",
+        "aspirina", "aas", "ácido acetilsalicílico", "flanax", "cataflam", "voltaren", "toradol", "nisulid", "nimesulida"
+      ],
+      "clinical_mechanism": "Inibição de COX-1 com desvio do metabolismo do ácido araquidônico para a via das 5-lipoxigenases, superprodução de leucotrienos broncoconstritores e nefrotoxicidade hemodinâmica direta por vasoconstrição da arteríola aferente renal.",
+      "contraindicated_drugs": [
+        "cetoprofeno", "profenid", "ibuprofeno", "alivium", "advil", "diclofenaco", "cataflam", "voltaren", "diclofenaco sódico", "diclofenaco potássico",
+        "piroxicam", "feldene", "naproxeno", "flanax", "meloxicam", "tenoxicam", "tilatil", "celecoxibe", "celebra",
+        "cetorolaco", "toradol", "nimesulida", "nisulid", "ácido acetilsalicílico", "aas", "aspirina", "indometacina"
+      ],
+      "safe_alternatives": {
+        "generic": "Paracetamol 500-750mg VO a cada 6 horas (analgésico seletivo seguro para estômago e rins) OU Dipirona 500-1000mg VO se não alérgica.",
+        "severe_musculoskeletal": "Relaxantes musculares (Ciclobenzaprina 5-10mg VO ao deitar) associados a calor local e opioides fracos (Tramadol/Codeína)."
+      }
+    },
+    "sulfas": {
+      "name": "Sulfonamidas e Derivados (Antimicrobianos e Diuréticos Sulfonamídicos)",
+      "allergy_terms": [
+        "sulfa", "sulfas", "sulfametoxazol", "bactrim", "sulfadiazina", "sulfonamida", "sulfonamidas", "sulfaprim"
+      ],
+      "clinical_mechanism": "Reação mediada por metabólitos oxidativos hidroxilamina com risco de farmacodermia grave, Síndrome de Stevens-Johnson (SSJ), Necrólise Epidérmica Tóxica (NET) e nefrite intersticial imunoalérgica.",
+      "contraindicated_drugs": [
+        "sulfametoxazol", "sulfametoxazol + trimetoprima", "bactrim", "bactrim f", "sulfaprim", "sulfadiazina", "sulfadiazina de prata",
+        "sulfassalazina", "dapsona", "azulfin"
+      ],
+      "safe_alternatives": {
+        "urinary": "Nitrofurantoína 100mg 6/6h VO OU Fosfomicina 3g dose única OU Quinolonas (Ciprofloxacino).",
+        "respiratory": "Quinolonas respiratórias ou Macrolídeos conforme antibiograma.",
+        "generic": "Esquema antimicrobiano de classe não-sulfonamídica conforme foco infeccioso e testes microbiológicos."
+      }
+    },
+    "opioides": {
+      "name": "Opioides e Narcóticos Naturais e Sintéticos",
+      "allergy_terms": [
+        "opioide", "opioides", "morfina", "tramadol", "codeina", "codeína", "fentanil", "oxicodona", "dimorf", "tramal", "tylex"
+      ],
+      "clinical_mechanism": "Liberação direta de histamina por degranulação de mastócitos ou reação anafilactoide com vasodilatação periférica, rubor, hipotensão postural e broncoespasmo grave.",
+      "contraindicated_drugs": [
+        "morfina", "dimorf", "sulfato de morfina", "tramadol", "tramal", "dorless", "codeína", "codeina", "tylex", "paco",
+        "fentanil", "durogesic", "oxicodona", "oxycontin", "metadona", "buprenorfina", "restiva"
+      ],
+      "safe_alternatives": {
+        "generic": "Analgesia não-opioide escalonada com Paracetamol 750mg + Dipirona 1g.",
+        "acute_severe_pain": "Bloqueios nervosos periféricos, anestesia peridural/raquidiana, Pregabalina/Gabapentina ou Cetamina em doses subanestésicas analgésicas."
+      }
+    },
+    "quinolonas": {
+      "name": "Fluoroquinolonas (Antimicrobianos de Amplo Espectro)",
+      "allergy_terms": [
+        "quinolona", "quinolonas", "ciprofloxacino", "cipro", "levofloxacino", "levaquin", "moxifloxacino", "norfloxacino", "floxin"
+      ],
+      "clinical_mechanism": "Ativação direta do receptor MRGPRX2 em mastócitos cutâneos com angioedema imediato, urticária, fototoxicidade e risco aumentado de tendinopatia/ruptura de tendão de Aquiles.",
+      "contraindicated_drugs": [
+        "ciprofloxacino", "cipro", "cloridrato de ciprofloxacino", "levofloxacino", "levaquin", "tamiram",
+        "moxifloxacino", "avalox", "norfloxacino", "flobacin", "ofloxacino"
+      ],
+      "safe_alternatives": {
+        "respiratory": "Macrolídeos (Azitromicina 500mg) associados a Betalactâmicos (Amoxicilina/Clavulanato ou Ceftriaxona se não alérgico).",
+        "urinary": "Aminoglicosídeos (Amicacina/Gentamicina), Nitrofurantoína, Fosfomicina ou Cefalosporinas de 3ª geração.",
+        "generic": "Antimicrobianos direcionados por urocultura ou cultura bacteriana de escarro/sangue."
+      }
+    },
+    "macrolideos": {
+      "name": "Macrolídeos e Lincosamidas",
+      "allergy_terms": [
+        "macrolideo", "macrolídeo", "macrolideos", "macrolídeos", "azitromicina", "claritromicina", "eritromicina", "zitromax", "klaricid"
+      ],
+      "clinical_mechanism": "Hipersensibilidade mediada por células T ou prolongamento de intervalo QT cardíaco com arritmias ventriculares (Torsades de Pointes) e hepatotoxicidade colestática.",
+      "contraindicated_drugs": [
+        "azitromicina", "zitromax", "azitron", "claritromicina", "klaricid", "eritromicina", "ilosone", "espiramicina"
+      ],
+      "safe_alternatives": {
+        "respiratory": "Doxiciclina 100mg 12/12h VO OU Fluoroquinolonas respiratórias (Levofloxacino 750mg/dia) se toleradas.",
+        "generic": "Beta-lactâmicos, Tetraciclinas ou Sulfas dependendo do perfil de sensibilidade do patógeno."
+      }
+    },
+    "contraste_iodado": {
+      "name": "Contraste Radiológico Iodado e Osmolar",
+      "allergy_terms": [
+        "contraste", "contraste iodado", "iodo", "iodo radiológico", "reação ao contraste", "reação iodada", "omnipaque", "optiray"
+      ],
+      "clinical_mechanism": "Reação anafilactoide não-IgE mediada por hiperosmolaridade com degranulação mastocitária imediata e risco de nefropatia induzida por contraste (NIC).",
+      "contraindicated_drugs": [
+        "contraste iodado", "contraste radiológico", "iohexol", "omnipaque", "iopamidol", "optiray", "iodixanol", "visipaque", "ioversol"
+      ],
+      "safe_alternatives": {
+        "imaging": "Tomografia Computadorizada SEM contraste iodado, Ultrassonografia com Doppler Vascular ou Ressonância Magnética com Gadolínio (se função renal > 30 mL/min).",
+        "emergency_with_contrast": "Se contraste estritamente indispensável em emergência: Protocolo de Dessensibilização de Urgência com Corticoide (Prednisona 50mg VO ou Hidrocortisona 200mg EV) + Anti-histamínico H1 (Difenidramina) 2h antes e hidratação venosa vigorosa."
+      }
+    },
+    "anestesicos_locais": {
+      "name": "Anestésicos Locais do Tipo Éster e Amida",
+      "allergy_terms": [
+        "anestesico", "anestésico", "anestesicos", "anestésicos", "lidocaina", "lidocaína", "bupivacaina", "bupivacaína", "xylocaina", "marcaina"
+      ],
+      "clinical_mechanism": "Dermatite de contato alérgica ou reação sistêmica tóxica (toxicidade sistêmica por anestésicos locais - LAST) ou hipersensibilidade a conservantes metilparabeno.",
+      "contraindicated_drugs": [
+        "lidocaína", "lidocaina", "xylocaína", "xylocaina", "bupivacaína", "bupivacaina", "marcaína", "marcaina",
+        "prilocaína", "ropivacaína", "tetracaína"
+      ],
+      "safe_alternatives": {
+        "generic": "Anestésicos locais de classe molecular oposta (troca de Éster por Amida pura livre de conservantes metilparabeno) ou anestesia geral inalatória."
+      }
+    },
+    "anticonvulsivantes": {
+      "name": "Anticonvulsivantes Aromáticos (Risco de DRESS / SSJ)",
+      "allergy_terms": [
+        "anticonvulsivante", "anticonvulsivantes", "carbamazepina", "tegretol", "fenitoina", "fenitoína", "hidantal", "lamotrigina", "lamictal", "fenobarbital"
+      ],
+      "clinical_mechanism": "Reação adversa imune tardia com hipereosinofilia e sintomas sistêmicos (Síndrome de DRESS) mediada por alelos HLA específicos (ex: HLA-B*1502).",
+      "contraindicated_drugs": [
+        "carbamazepina", "tegretol", "fenitoína", "fenitoina", "hidantal", "lamotrigina", "lamictal", "fenobarbital", "gardenal", "oxcarbazepina", "trileptal"
+      ],
+      "safe_alternatives": {
+        "generic": "Anticonvulsivantes não-aromáticos seguros: Levetiracetam (Keppra), Valproato de Sódio / Divalproato ou Topiramato."
+      }
+    }
+  }
+}
